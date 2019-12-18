@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/jackspirou/syscerts"
@@ -93,13 +94,13 @@ func NewAutoscaleClient(c *cli.Context) (drone.Client, error) {
 
 // ParseRepo parses the repository owner and name from a string.
 func ParseRepo(str string) (user, repo string, err error) {
-	var parts = strings.Split(str, "/")
-	if len(parts) != 2 {
+	if lastIndex := strings.LastIndex(str, "/"); lastIndex > 0 && lastIndex < len(str)-1 {
+		user = url.QueryEscape(str[0:lastIndex])
+		repo = url.QueryEscape(str[lastIndex+1:])
+	} else {
 		err = fmt.Errorf("Error: Invalid or missing repository (e.g. octocat/hello-world).")
 		return
 	}
-	user = parts[0]
-	repo = parts[1]
 	return
 }
 
